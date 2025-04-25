@@ -29,26 +29,35 @@ namespace Player
             shipPartManager = gameObject.GetComponent<ShipPartManager>();
             StartCoroutine(Debug());
         }
-        
-        private IEnumerator Debug()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(0.5f);
-                shipPartManager.AddBeam();
-                yield return new WaitForSeconds(0.5f);
-                shipPartManager.AddEngine();
-                yield return new WaitForSeconds(0.5f);
-                shipPartManager.AddWing();
-            }
-        }
 
         // Методы для стрельбы
         void Update()
         {
             HandleQueuedParts();
+
+            if (Input.GetKey(KeyCode.Space))
+            {
+                StartCoroutine(Short());
+            }
+            else if (Input.GetKeyUp(KeyCode.Space))
+            {
+                StartCoroutine(Short());
+            }
         }
 
+        private IEnumerator Short()
+        {
+            if (rapidFire)
+            {
+                yield return new WaitForSeconds(0.25f);
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
+            
+            Shoot();
+        }
         void Shoot()
         {
             // Отправляем пулю в зависимости от текущего состояния
@@ -191,5 +200,19 @@ namespace Player
             return null;
         }
 
+        private IEnumerator Debug()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(0.5f);
+                shipPartManager.AddGun();
+                yield return new WaitForSeconds(0.5f);
+                shipPartManager.AddBeam();
+                yield return new WaitForSeconds(0.5f);
+                shipPartManager.AddEngine();
+                yield return new WaitForSeconds(0.5f);
+                shipPartManager.AddWing();
+            }
+        }
     }
 }

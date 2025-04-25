@@ -8,10 +8,12 @@ namespace Player.Parts
         public List<string> availableWingPaths = new List<string>();
         public List<string> availableEnginePaths = new List<string>();
         public List<string> availableBeamPaths = new List<string>();
+        public List<string> availableGunPaths = new List<string>();
         
         private int currentWingIndex = 0;
         private int currentEngineIndex = 0;
         private int currentBeamIndex = 0;
+        private int currentGunIndex = 0;
         
         private List<Transform> wingRoots = new List<Transform>(); // корни для поиска attach-точек
 
@@ -35,6 +37,10 @@ namespace Player.Parts
             AttachNextFromList(availableBeamPaths, ref currentBeamIndex, wingRoots);
         }
 
+        public void AddGun()
+        {
+            AttachNextFromList(availableGunPaths, ref currentGunIndex, wingRoots);
+        }
         
         private void AttachNextFromList(List<string> partPaths, ref int index, List<Transform> possibleParents)
         {
