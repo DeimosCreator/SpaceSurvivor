@@ -1,6 +1,5 @@
 # ========== Unity ==========
 
-# Системные каталоги Unity
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -8,8 +7,9 @@
 [Bb]uilds/
 [Ll]ogs/
 UserSettings/
+MemoryCaptures/
+Recordings/
 
-# Кэш, временные файлы и отладочная информация
 *.tmp
 *.bak
 *.pidb
@@ -20,56 +20,44 @@ UserSettings/
 *.VC.db
 sysinfo.txt
 
-# Unity Crash Reports
 *.pidb.meta
 *.pdb.meta
 *.mdb.meta
 
-# Запакованные билды
 *.apk
 *.aab
 *.app
 *.unitypackage
 *.unitypackage.meta
 
-# Addressables (Packed content)
 Assets/AddressableAssetsData/*/*.bin*
 Assets/StreamingAssets/aa.meta
 Assets/StreamingAssets/aa/*
 
-# Плагины, автоматически создаваемые Unity или JetBrains
 Assets/Plugins/Editor/JetBrains*
 
-# Память, захваты и видео
-MemoryCaptures/
-Recordings/
-
-# ========== JetBrains Rider / IDEs ==========
+# ========== IDEs ==========
 
 .idea/
 *.sln
 *.csproj
+*.unityproj
 *.user
+*.userprefs
 *.suo
 
 # ========== Visual Studio ==========
 
 .vs/
-*.unityproj
-*.userprefs
-
-# ========== MonoDevelop / Consulo ==========
-*.booproj
-.consulo/
 
 # ========== Gradle / Android ==========
 
 .gradle/
 crashlytics-build.properties
 
-# ========== Экспортируемые объекты ==========
+# ========== Exported Objects ==========
+
 ExportedObj/
 
 # ========== Asset Store Tools ==========
-# Убери комментарий, если используешь плагин Asset Store Tools
 # Assets/AssetStoreTools*
