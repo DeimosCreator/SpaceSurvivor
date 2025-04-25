@@ -129,6 +129,6 @@ Assets/
 
 ---
 
-- **Автор игры**: [] 
+- **Автор игры**: [DeimosCreator](https://github.com/DeimosCreator/)
 - **Графика**: использованы ассеты из [Kenney](https://kenney.nl) и собственного производства 
 - **Звук**: TBD / генерация звуков
