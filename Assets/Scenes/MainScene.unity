@@ -2269,6 +2269,10 @@ MonoBehaviour:
   - Sprites/Player/Parts/bottom/bottom/engine1
   - Sprites/Player/Parts/left/bottom/bottom/engine1
   - Sprites/Player/Parts/right/bottom/bottom/engine1
+  availableBeamPaths:
+  - Sprites/Player/Parts/bottom/beam0
+  - Sprites/Player/Parts/left/bottom/beam0
+  - Sprites/Player/Parts/right/bottom/beam0
 --- !u!114 &2027188472566326398
 MonoBehaviour:
   m_ObjectHideFlags: 0

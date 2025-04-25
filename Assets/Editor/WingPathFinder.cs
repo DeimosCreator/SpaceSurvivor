@@ -51,6 +51,27 @@ namespace Editor
                 }
             }
             
+            if (GUILayout.Button("Найти пути к beam0"))
+            {
+                string rootFolder = Application.dataPath + "/Resources/Sprites/Player/Parts";
+                string[] allFiles = Directory.GetFiles(rootFolder, "beam0.prefab", SearchOption.AllDirectories);
+
+                manager.availableBeamPaths.Clear();
+
+                foreach (string fullPath in allFiles)
+                {
+                    string relativePath = fullPath.Replace(Application.dataPath + "/Resources/", "");
+                    relativePath = Path.ChangeExtension(relativePath, null);
+                    relativePath = relativePath.Replace("\\", "/");
+
+                    manager.availableBeamPaths.Add(relativePath);
+                    Debug.Log("Найден путь: " + relativePath);
+                }
+
+                EditorUtility.SetDirty(manager);
+            }
+            
+            
             if (GUILayout.Button("Найти пути к engine1"))
             {
                 string rootFolder = Application.dataPath + "/Resources/Sprites/Player/Parts";

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Player.Parts;
 using Player.Weapons;
@@ -26,18 +27,25 @@ namespace Player
         void Awake()
         {
             shipPartManager = gameObject.GetComponent<ShipPartManager>();
+            StartCoroutine(Debug());
+        }
+        
+        private IEnumerator Debug()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(0.5f);
+                shipPartManager.AddBeam();
+                yield return new WaitForSeconds(0.5f);
+                shipPartManager.AddEngine();
+                yield return new WaitForSeconds(0.5f);
+                shipPartManager.AddWing();
+            }
         }
 
         // Методы для стрельбы
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Space) && ammo > 0)
-            {
-                Shoot();
-                shipPartManager.AddEngine();
-            }
-
-            // Обработка добавленных деталей
             HandleQueuedParts();
         }
 
@@ -96,7 +104,7 @@ namespace Player
         public void IncreaseSpeed(float amount)
         {
             speed += amount;
-            shipPartManager.AddEngine();
+            //shipPartManager.AddEngine();
         }
 
         // Метод для получения нового оружия

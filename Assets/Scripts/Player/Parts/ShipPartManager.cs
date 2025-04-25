@@ -7,10 +7,12 @@ namespace Player.Parts
     {
         public List<string> availableWingPaths = new List<string>();
         public List<string> availableEnginePaths = new List<string>();
-
+        public List<string> availableBeamPaths = new List<string>();
+        
         private int currentWingIndex = 0;
         private int currentEngineIndex = 0;
-
+        private int currentBeamIndex = 0;
+        
         private List<Transform> wingRoots = new List<Transform>(); // корни для поиска attach-точек
 
         private void Start()
@@ -27,7 +29,13 @@ namespace Player.Parts
         {
             AttachNextFromList(availableEnginePaths, ref currentEngineIndex, wingRoots);
         }
+        
+        public void AddBeam()
+        {
+            AttachNextFromList(availableBeamPaths, ref currentBeamIndex, wingRoots);
+        }
 
+        
         private void AttachNextFromList(List<string> partPaths, ref int index, List<Transform> possibleParents)
         {
             if (partPaths.Count == 0) return;
@@ -55,7 +63,7 @@ namespace Player.Parts
                 return;
             }
 
-            string direction = pathParts[^2]; // ^2 — в C# значит "второй с конца"
+            string direction = pathParts[^2];
 
 
             Transform attachPoint = null;
