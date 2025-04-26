@@ -20,6 +20,13 @@ namespace Player.Weapons
                 enemy.TakeDamage(damage);
                 Destroy(gameObject);
             }
+
+            var obstacle = other.GetComponent<Obstacles.Obstacle>();
+            if (obstacle != null)
+            {
+                obstacle.TakeDamage(damage);
+                Destroy(gameObject);
+            }
         }
     }
 }

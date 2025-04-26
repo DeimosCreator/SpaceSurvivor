@@ -21,10 +21,10 @@ namespace Core
                 currentLevel++;
                 currentLevel = Mathf.Min(currentLevel, 10);
 
-                spawner.interval = Mathf.Max(0.5f, spawner.interval - spawnSpeedIncrease);
+                spawner.enemyInterval = Mathf.Max(0.5f, spawner.enemyInterval - spawnSpeedIncrease);
                 spawner.SetLevel(currentLevel);
                 statusBar.ResetTimer();
-                Debug.Log($"Уровень {currentLevel}, Интервал: {spawner.interval}");
+                Debug.Log($"Уровень {currentLevel}, Интервал: {spawner.enemyInterval}");
             }
         }
 
