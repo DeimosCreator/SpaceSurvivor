@@ -53,7 +53,7 @@ namespace UI
         {
             if (ammoBar == null) return;
 
-            float ammoPercent = Mathf.Clamp01(playerShooting.GetAmmo() / 100f);
+            float ammoPercent = Mathf.Clamp01(playerShooting.GetAmmo() / (float)playerShooting.maxammo);
             ammoBar.fillAmount = Mathf.Lerp(ammoBar.fillAmount, ammoPercent, Time.deltaTime * 10f);
         }
 

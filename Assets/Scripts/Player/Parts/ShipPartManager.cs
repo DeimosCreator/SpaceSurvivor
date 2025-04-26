@@ -24,6 +24,9 @@ namespace Player.Parts
 
         public void AddWing()
         {
+            PlayerShooting playerShooting = gameObject.GetComponent<PlayerShooting>();
+            if (playerShooting.wingCount >= 20) return;
+            playerShooting.wingCount++;
             AttachNextFromList(availableWingPaths, ref currentWingIndex, wingRoots);
         }
 
@@ -37,22 +40,22 @@ namespace Player.Parts
             AttachNextFromList(availableBeamPaths, ref currentBeamIndex, wingRoots);
         }
 
-        public void AddGun()
+        public void AddGun(GameObject firePoint)
         {
-            AttachNextFromList(availableGunPaths, ref currentGunIndex, wingRoots);
+            AttachNextFromList(availableGunPaths, ref currentGunIndex, wingRoots, firePoint);
         }
         
-        private void AttachNextFromList(List<string> partPaths, ref int index, List<Transform> possibleParents)
+        private void AttachNextFromList(List<string> partPaths, ref int index, List<Transform> possibleParents, GameObject child = null)
         {
             if (partPaths.Count == 0) return;
 
             string path = partPaths[index];
             index = (index + 1) % partPaths.Count; // по кругу
 
-            AttachPart(path, possibleParents);
+            AttachPart(path, possibleParents, child);
         }
 
-        public void AttachPart(string fullPath, List<Transform> possibleParents)
+        private void AttachPart(string fullPath, List<Transform> possibleParents, GameObject child = null)
         {
             GameObject partPrefab = Resources.Load<GameObject>(fullPath);
             if (partPrefab == null)
@@ -92,6 +95,18 @@ namespace Player.Parts
             part.name = partPrefab.name;
             part.transform.localPosition = Vector3.zero;
             part.transform.localRotation = Quaternion.identity;
+            if (child)
+            {
+                GameObject partChild = Instantiate(child, part.transform);
+                partChild.name = child.name;
+                partChild.transform.localPosition = Vector3.zero;
+                partChild.transform.localRotation = Quaternion.identity;
+                PlayerShooting playerShooting = gameObject.GetComponent<PlayerShooting>();
+                playerShooting.firePoints.Add(partChild.transform);
+                playerShooting.gunCount++;
+                playerShooting.maxammo = 100 * playerShooting.gunCount;
+                playerShooting.ammo += 33;
+            }
 
             // Добавляем как новый корень для будущих деталей
             possibleParents.Add(part.transform);

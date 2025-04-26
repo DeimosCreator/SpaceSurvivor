@@ -10,14 +10,19 @@ namespace Player
     public class PlayerShooting : MonoBehaviour
     {
         public GameObject bulletPrefab;
-        public Transform firePoint;
+        public List<Transform> firePoints = new List<Transform>();
+        public GameObject gunFirePoint;
 
-        private int ammo = 33;  // Начальные патроны
+        public int ammo = 33;  // Начальные патроны
+        public int maxammo = 100;
+        public int gunCount = 1;
+        public int wingCount = 0;
         private bool doubleDamage = false;
         private bool rapidFire = false;
         private float speed = 5f; // Начальная скорость игрока
         private GameObject currentWeapon;
         private ShipPartManager shipPartManager;
+        private Coroutine shootCoroutine;
         
         public static int health = 100; // Начальное здоровье
 
@@ -29,48 +34,47 @@ namespace Player
             shipPartManager = gameObject.GetComponent<ShipPartManager>();
             StartCoroutine(Debug());
         }
-
-        // Методы для стрельбы
+        
         void Update()
         {
-            HandleQueuedParts();
-
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) && shootCoroutine == null)
             {
-                StartCoroutine(Short());
+                shootCoroutine = StartCoroutine(Short());
             }
-            else if (Input.GetKeyUp(KeyCode.Space))
+            else if (Input.GetKeyUp(KeyCode.Space) && shootCoroutine != null)
             {
-                StartCoroutine(Short());
+                StopCoroutine(shootCoroutine);
+                shootCoroutine = null;
             }
         }
+
 
         private IEnumerator Short()
         {
-            if (rapidFire)
+            while (true)
             {
-                yield return new WaitForSeconds(0.25f);
+                Shoot();
+                if (rapidFire)
+                    yield return new WaitForSeconds(0.25f);
+                else
+                    yield return new WaitForSeconds(0.5f);
             }
-            else
-            {
-                yield return new WaitForSeconds(0.5f);
-            }
-            
-            Shoot();
         }
+
         void Shoot()
         {
-            // Отправляем пулю в зависимости от текущего состояния
-            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-
-            // Если бонус "DoubleDamage" активен — наносим больше урона
-            Bullet bullet = bulletPrefab.GetComponent<Bullet>();
-            if (bullet != null && doubleDamage)
+            foreach (var firePoint in firePoints)
             {
-                bullet.damage *= 2;
-            }
+                GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+                Bullet bullet = bulletObj.GetComponent<Bullet>();
+                if (bullet != null && doubleDamage)
+                {
+                    bullet.damage *= 2;
+                }
 
-            ammo--;
+
+                ammo--;
+            }
         }
 
         // Методы для бонусов
@@ -114,17 +118,6 @@ namespace Player
         {
             speed += amount;
             //shipPartManager.AddEngine();
-        }
-
-        // Метод для получения нового оружия
-        public void EquipNewWeapon(GameObject newWeapon)
-        {
-            if (currentWeapon != null)
-            {
-                Destroy(currentWeapon); // Удалить текущее оружие
-            }
-
-            currentWeapon = Instantiate(newWeapon, firePoint.position, firePoint.rotation); // Даем новое оружие
         }
 
         // Метод для получения текущего здоровья
@@ -204,13 +197,13 @@ namespace Player
         {
             while (true)
             {
-                yield return new WaitForSeconds(0.5f);
-                shipPartManager.AddGun();
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.1f);
+                shipPartManager.AddGun(gunFirePoint);
+                yield return new WaitForSeconds(0.1f);
                 shipPartManager.AddBeam();
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.1f);
                 shipPartManager.AddEngine();
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.1f);
                 shipPartManager.AddWing();
             }
         }
