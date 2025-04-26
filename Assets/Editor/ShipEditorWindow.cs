@@ -15,7 +15,6 @@ namespace Editor
         private ShipPart selectedShipPart;
         private ShipPart previousSelectedPart;
 
-        private string prefabFolderPath = "Assets/Resources/Sprites/Player/Parts"; // Папка для префабов
 
         [MenuItem("Window/Ship Editor")]
         public static void ShowWindow()

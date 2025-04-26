@@ -44,19 +44,19 @@ namespace Bonuses
                     playerShooting.AddAmmo(10); // Добавить патроны
                     break;
                 case BonusType.DoubleDamage:
-                    playerShooting.DoubleDamage(10f); // Увеличить урон на время
+                    playerShooting.AddDamage(5); // Увеличить урон
                     break;
                 case BonusType.RapidFire:
                     playerShooting.EnableRapidFire(); // Включить быструю стрельбу
                     break;
                 case BonusType.Health:
-                    playerShooting.Heal(20); // Восстановить здоровье
+                    playerShooting.AddHeal(20); // Восстановить здоровье
                     break;
                 case BonusType.Speed:
-                    playerShooting.IncreaseSpeed(2f); // Увеличить скорость
+                    playerShooting.AddSpeed(2f); // Увеличить скорость
                     break;
                 case BonusType.NewWeapon:
-                    player.GetComponent<ShipExpander>().AddRandomPart();
+                    playerShooting.AddWing(); //Добавляем крыло
                     break;
             }
         }

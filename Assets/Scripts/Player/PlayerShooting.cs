@@ -17,17 +17,20 @@ namespace Player
         public int maxammo = 100;
         public int gunCount = 1;
         public int wingCount = 0;
-        private bool doubleDamage = false;
+        
+        private int damage = 10;
         private bool rapidFire = false;
-        private float speed = 5f; // Начальная скорость игрока
         private GameObject currentWeapon;
         private ShipPartManager shipPartManager;
         private Coroutine shootCoroutine;
-        
+
+        private int maxHealth = 100;
         public static int health = 100; // Начальное здоровье
 
         // Очередь для деталей, которые нужно добавить
         private Queue<ShipPart> partsToAdd = new Queue<ShipPart>();
+
+        private bool isBeam = false;
 
         void Awake()
         {
@@ -65,33 +68,33 @@ namespace Player
         {
             foreach (var firePoint in firePoints)
             {
-                GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-                Bullet bullet = bulletObj.GetComponent<Bullet>();
-                if (bullet != null && doubleDamage)
+                if (ammo > 0)
                 {
-                    bullet.damage *= 2;
+                    GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+                    Bullet bullet = bulletObj.GetComponent<Bullet>();
+                    bullet.damage = damage;
+                    ammo--;
                 }
-
-
-                ammo--;
             }
         }
 
         // Методы для бонусов
+
+        public void AddWing()
+        {
+            gameObject.GetComponent<PlayerController>().rotationSpeed += 20;
+            shipPartManager.AddWing();
+        }
+        
         public void AddAmmo(int amount)
         {
             ammo += amount;
         }
 
-        public void DoubleDamage(float multiplier)
+        public void AddDamage(int amount)
         {
-            doubleDamage = true;
-            Invoke("DisableDoubleDamage", multiplier);
-        }
-
-        void DisableDoubleDamage()
-        {
-            doubleDamage = false;
+            shipPartManager.AddGun(gunFirePoint);
+            damage += amount;
         }
 
         public void EnableRapidFire()
@@ -107,17 +110,29 @@ namespace Player
         }
 
         // Метод для добавления здоровья
-        public void Heal(int amount)
+        public void AddHeal(int amount)
         {
-            shipPartManager.AddWing();
-            health = Mathf.Min(health + amount, 100); // Максимум 100 здоровья
+            if (maxHealth - (health + amount) < 0)
+            {
+                maxHealth += health + amount - maxHealth;
+            }
+            health = Mathf.Min(health + amount, maxHealth);
         }
 
         // Метод для увеличения скорости
-        public void IncreaseSpeed(float amount)
+        public void AddSpeed(float amount)
         {
-            speed += amount;
-            //shipPartManager.AddEngine();
+            gameObject.GetComponent<PlayerController>().moveSpeed += amount;
+            if (!isBeam)
+            {
+                shipPartManager.AddBeam();
+                isBeam = true;
+            }
+            else
+            {
+                shipPartManager.AddEngine();
+                isBeam = false;
+            }
         }
 
         // Метод для получения текущего здоровья
@@ -129,68 +144,12 @@ namespace Player
         // Метод для получения текущей скорости
         public float GetSpeed()
         {
-            return speed;
+            return gameObject.GetComponent<PlayerController>().moveSpeed;
         }
 
         public int GetAmmo()
         {
             return ammo;
-        }
-
-        // Метод для добавления детали
-        public void AddPartToShip(ShipPart newPart, Transform attachPoint)
-        {
-            // Проверяем, есть ли точка крепления
-            if (attachPoint == null)
-            {
-                // Если точки нет — ставим в очередь
-                partsToAdd.Enqueue(newPart);
-            }
-            else
-            {
-                // Если точка есть — добавляем деталь немедленно
-                Instantiate(newPart.gameObject, attachPoint.position, attachPoint.rotation);
-            }
-        }
-
-        // Метод для обработки очереди добавления деталей
-        private void HandleQueuedParts()
-        {
-            // Просматриваем все детали в очереди
-            for (int i = 0; i < partsToAdd.Count; i++)
-            {
-                ShipPart partToAdd = partsToAdd.Dequeue();
-                Transform attachPoint = FindAvailableAttachPoint();
-
-                // Если точка была найдена, добавляем деталь
-                if (attachPoint != null)
-                {
-                    Instantiate(partToAdd.gameObject, attachPoint.position, attachPoint.rotation);
-                }
-                else
-                {
-                    // Если точка не найдена, ставим обратно в очередь для повторной попытки
-                    partsToAdd.Enqueue(partToAdd);
-                }
-            }
-        }
-
-        // Метод для поиска доступной точки крепления
-        private Transform FindAvailableAttachPoint()
-        {
-            // Проходим по всем точкам крепления на корабле
-            foreach (Transform attachPoint in transform) // transform — это сам объект корабля
-            {
-                // Проверяем, свободна ли точка крепления (например, нет ли уже дочернего объекта на этой точке)
-                if (attachPoint.childCount == 0) // Если в точке крепления нет дочерних объектов
-                {
-                    // Эта точка свободна, возвращаем её
-                    return attachPoint;
-                }
-            }
-
-            // Если все точки крепления заняты, возвращаем null
-            return null;
         }
 
         private IEnumerator Debug()
