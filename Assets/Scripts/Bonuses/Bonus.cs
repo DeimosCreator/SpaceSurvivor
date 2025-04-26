@@ -41,7 +41,7 @@ namespace Bonuses
             switch (type)
             {
                 case BonusType.ExtraAmmo:
-                    playerShooting.AddAmmo(10); // Добавить патроны
+                    playerShooting.AddAmmo(20); // Добавить патроны
                     break;
                 case BonusType.DoubleDamage:
                     playerShooting.AddDamage(5); // Увеличить урон

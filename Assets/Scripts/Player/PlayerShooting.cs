@@ -35,7 +35,6 @@ namespace Player
         void Awake()
         {
             shipPartManager = gameObject.GetComponent<ShipPartManager>();
-            StartCoroutine(Debug());
         }
         
         void Update()
@@ -88,7 +87,7 @@ namespace Player
         
         public void AddAmmo(int amount)
         {
-            ammo += amount;
+            ammo += amount * gunCount;
         }
 
         public void AddDamage(int amount)
@@ -150,21 +149,6 @@ namespace Player
         public int GetAmmo()
         {
             return ammo;
-        }
-
-        private IEnumerator Debug()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(0.1f);
-                shipPartManager.AddGun(gunFirePoint);
-                yield return new WaitForSeconds(0.1f);
-                shipPartManager.AddBeam();
-                yield return new WaitForSeconds(0.1f);
-                shipPartManager.AddEngine();
-                yield return new WaitForSeconds(0.1f);
-                shipPartManager.AddWing();
-            }
         }
     }
 }

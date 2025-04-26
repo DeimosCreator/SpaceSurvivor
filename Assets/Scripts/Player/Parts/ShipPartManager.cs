@@ -9,121 +9,158 @@ namespace Player.Parts
         public List<string> availableEnginePaths = new List<string>();
         public List<string> availableBeamPaths = new List<string>();
         public List<string> availableGunPaths = new List<string>();
-        
+
         private int currentWingIndex = 0;
         private int currentEngineIndex = 0;
         private int currentBeamIndex = 0;
         private int currentGunIndex = 0;
-        
-        private List<Transform> wingRoots = new List<Transform>(); // корни для поиска attach-точек
+
+        private List<Transform> attachRoots = new List<Transform>();
+        private Queue<(string path, GameObject child)> pendingParts = new Queue<(string, GameObject)>();
 
         private void Start()
         {
-            wingRoots.Add(transform); // изначально корень — сам корабль
+            attachRoots.Add(transform);
         }
 
         public void AddWing()
         {
-            PlayerShooting playerShooting = gameObject.GetComponent<PlayerShooting>();
+            var playerShooting = GetComponent<PlayerShooting>();
             if (playerShooting.wingCount >= 20) return;
+
             playerShooting.wingCount++;
-            AttachNextFromList(availableWingPaths, ref currentWingIndex, wingRoots);
+            AttachNextFromList(availableWingPaths, ref currentWingIndex);
         }
 
         public void AddEngine()
         {
-            AttachNextFromList(availableEnginePaths, ref currentEngineIndex, wingRoots);
+            AttachNextFromList(availableEnginePaths, ref currentEngineIndex);
         }
-        
+
         public void AddBeam()
         {
-            AttachNextFromList(availableBeamPaths, ref currentBeamIndex, wingRoots);
+            AttachNextFromList(availableBeamPaths, ref currentBeamIndex);
         }
 
         public void AddGun(GameObject firePoint)
         {
-            AttachNextFromList(availableGunPaths, ref currentGunIndex, wingRoots, firePoint);
+            AttachNextFromList(availableGunPaths, ref currentGunIndex, firePoint);
         }
-        
-        private void AttachNextFromList(List<string> partPaths, ref int index, List<Transform> possibleParents, GameObject child = null)
+
+        private void AttachNextFromList(List<string> partPaths, ref int index, GameObject child = null)
         {
             if (partPaths.Count == 0) return;
 
             string path = partPaths[index];
-            index = (index + 1) % partPaths.Count; // по кругу
+            index = (index + 1) % partPaths.Count;
 
-            AttachPart(path, possibleParents, child);
+            TryAttachPart(path, child);
         }
 
-        private void AttachPart(string fullPath, List<Transform> possibleParents, GameObject child = null)
+        private void TryAttachPart(string fullPath, GameObject child = null)
+        {
+            if (!AttachPart(fullPath, child))
+            {
+                pendingParts.Enqueue((fullPath, child));
+            }
+        }
+
+        private bool AttachPart(string fullPath, GameObject child = null)
         {
             GameObject partPrefab = Resources.Load<GameObject>(fullPath);
             if (partPrefab == null)
             {
                 Debug.LogWarning($"Part prefab not found at path '{fullPath}'");
-                return;
+                return true;
             }
 
-            // Направление из пути: Sprites/Player/Parts/left/wingBlue_0 → "left"
             string[] pathParts = fullPath.Split('/');
             if (pathParts.Length < 5)
             {
-                Debug.LogWarning("Invalid path format: " + fullPath);
-                return;
+                Debug.LogWarning($"Invalid path format: {fullPath}");
+                return true;
             }
 
-            string direction = pathParts[^2];
-
+            string category = pathParts[^3]; // <- категория (например "beam" или "engine")
+            string direction = pathParts[^2]; // <- направление (например "bottom", "left")
 
             Transform attachPoint = null;
 
-            // Ищем подходящую attach-точку среди всех родителей
-            foreach (Transform root in possibleParents)
+            foreach (var root in attachRoots)
             {
-                attachPoint = FindAttachPointRecursive(root, direction);
+                attachPoint = FindAttachPointRecursive(root, direction, category);
                 if (attachPoint != null)
                     break;
             }
 
             if (attachPoint == null)
             {
-                Debug.LogWarning($"No available attach point for direction '{direction}'");
-                return;
+                Debug.LogWarning($"No available attach point for direction '{direction}' and category '{category}'");
+                return false;
             }
 
             GameObject part = Instantiate(partPrefab, attachPoint);
             part.name = partPrefab.name;
             part.transform.localPosition = Vector3.zero;
             part.transform.localRotation = Quaternion.identity;
-            if (child)
+
+            if (child != null)
             {
                 GameObject partChild = Instantiate(child, part.transform);
                 partChild.name = child.name;
                 partChild.transform.localPosition = Vector3.zero;
                 partChild.transform.localRotation = Quaternion.identity;
-                PlayerShooting playerShooting = gameObject.GetComponent<PlayerShooting>();
+
+                var playerShooting = GetComponent<PlayerShooting>();
                 playerShooting.firePoints.Add(partChild.transform);
                 playerShooting.gunCount++;
                 playerShooting.maxammo = 100 * playerShooting.gunCount;
                 playerShooting.ammo += 33;
             }
 
-            // Добавляем как новый корень для будущих деталей
-            possibleParents.Add(part.transform);
+            attachRoots.Add(part.transform);
+            Debug.Log($"[ShipPartManager] Attached '{part.name}' at '{direction}' for category '{category}' from '{fullPath}'");
 
-            Debug.Log($"Attached '{part.name}' to direction '{direction}' from path '{fullPath}'");
+            AttachPendingParts();
+            return true;
         }
 
-        private Transform FindAttachPointRecursive(Transform parent, string direction)
+        private void AttachPendingParts()
+        {
+            if (pendingParts.Count == 0)
+                return;
+
+            Queue<(string path, GameObject child)> remaining = new Queue<(string, GameObject)>();
+
+            while (pendingParts.Count > 0)
+            {
+                var (path, child) = pendingParts.Dequeue();
+                if (!AttachPart(path, child))
+                    remaining.Enqueue((path, child));
+            }
+
+            pendingParts = remaining;
+        }
+
+        private Transform FindAttachPointRecursive(Transform parent, string direction, string requiredCategory)
         {
             foreach (Transform child in parent)
             {
-                if (child.name.ToLower() == direction.ToLower() && child.childCount == 0)
-                    return child;
+                if (child.name.ToLower() == direction.ToLower())
+                {
+                    // Если точка ПУСТА или в ней стоит правильная категория
+                    if (child.childCount == 0)
+                        return child;
 
-                Transform result = FindAttachPointRecursive(child, direction);
-                if (result != null)
-                    return result;
+                    // Либо проверяем, что уже прикреплён правильный тип (например beam к beam)
+                    var existingPart = child.GetChild(0);
+                    if (existingPart.name.ToLower().Contains(requiredCategory.ToLower()))
+                        continue; // уже занято нужной категорией
+                }
+
+                Transform found = FindAttachPointRecursive(child, direction, requiredCategory);
+                if (found != null)
+                    return found;
             }
 
             return null;
