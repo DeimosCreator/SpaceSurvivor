@@ -9,7 +9,7 @@ namespace Player.Weapons
 
         void Update()
         {
-            transform.Translate(Vector2.up * speed * Time.deltaTime);
+            transform.Translate(Vector2.up * (speed * Time.deltaTime));
         }
 
         void OnTriggerEnter2D(Collider2D other)
@@ -17,6 +17,12 @@ namespace Player.Weapons
             var enemy = other.GetComponent<Enemies.Enemy>();
             if (enemy != null)
             {
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+
+                if (effect != null)
+                {
+                    effect.enemy.SpawnIskraEffect(other.gameObject, gameObject.transform.position, other.transform.rotation.z);
+                }
                 enemy.TakeDamage(damage);
                 Destroy(gameObject);
             }

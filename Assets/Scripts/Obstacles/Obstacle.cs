@@ -27,10 +27,11 @@ namespace Obstacles
                 {
                     statusPlanetBur.SetScale(damage); // Передаём урон
                 }
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+                effect.earth.SpawnDamage(gameObject.transform.position);
             }
 
             Destroy(gameObject);
-            // Здесь позже добавим эффекты
         }
 
         private void OnTriggerEnter2D(Collider2D other)

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Enemies
+namespace Obstacles
 {
     public class ObstacleMover : MonoBehaviour
     {
