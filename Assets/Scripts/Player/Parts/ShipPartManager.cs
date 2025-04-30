@@ -103,7 +103,22 @@ namespace Player.Parts
             part.name = partPrefab.name;
             part.transform.localPosition = Vector3.zero;
             part.transform.localRotation = Quaternion.identity;
+            var spriteRenderer = part.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sortingLayerName = "Player";
+                GameObject maskContainer = new GameObject("SpriteMaskContainer");
+                maskContainer.transform.SetParent(part.transform);
+                maskContainer.transform.localPosition = Vector3.zero;
+                maskContainer.transform.localRotation = Quaternion.identity;
 
+                var spriteMask = maskContainer.AddComponent<SpriteMask>();
+                spriteMask.sprite = spriteRenderer.sprite;
+
+                // Устанавливаем взаимодействие родительского спрайта с маской
+                spriteRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            }
+            
             if (child != null)
             {
                 GameObject partChild = Instantiate(child, part.transform);

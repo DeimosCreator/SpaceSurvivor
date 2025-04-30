@@ -5,7 +5,7 @@ namespace Player.Weapons
     public class Bullet : MonoBehaviour
     {
         public float speed = 10f;
-        public int damage = 10;
+        public int damage = 5;
 
         void Update()
         {

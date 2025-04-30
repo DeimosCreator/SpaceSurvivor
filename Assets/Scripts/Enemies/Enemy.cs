@@ -41,6 +41,10 @@ namespace Enemies
             if (other.gameObject.CompareTag("Player"))
             {
                 Player.PlayerShooting.health -= hp / 10 * 5;
+                
+                Vector2 hitPoint = transform.position;
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+                effect.player.SpawnDamage(hitPoint, other.gameObject);
                 Die();
             }
 

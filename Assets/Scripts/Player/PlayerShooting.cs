@@ -5,6 +5,7 @@ using Player.Parts;
 using Player.Weapons;
 using UI;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Player
 {
@@ -19,7 +20,7 @@ namespace Player
         public int gunCount = 1;
         public int wingCount = 0;
         
-        private int damage = 10;
+        private int damage = 5;
         private bool rapidFire = false;
         private GameObject currentWeapon;
         private ShipPartManager shipPartManager;
@@ -117,6 +118,17 @@ namespace Player
                 maxHealth += health + amount - maxHealth;
             }
             health = Mathf.Min(health + amount, maxHealth);
+
+            GameObject[] damageEffects = GameObject.FindGameObjectsWithTag("Damage");
+            
+            int index = Random.Range(0, damageEffects.Length);
+            GameObject toRemove = damageEffects[index];
+            
+            Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+            if (effect != null)
+            {
+                effect.Destroy_Effect(toRemove, 1); 
+            }
         }
 
         // Метод для увеличения скорости

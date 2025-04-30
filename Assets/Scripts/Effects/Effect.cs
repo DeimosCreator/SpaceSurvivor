@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace Effects
@@ -15,7 +17,7 @@ namespace Effects
         void Awake()
         {
             earth = new Earth("Sprites/Effects/Earth");
-            player = new Player("Sprites/Effects/Player");
+            player = new Player("Sprites/Effects/Player", this);
             enemy = new Enemy("Sprites/Effects/Enemy", this);
         }
 
@@ -46,9 +48,11 @@ namespace Effects
         public class Player
         {
             private List<GameObject> playerEffects = new List<GameObject>();
+            private Effect parent;
 
-            public Player(string path)
+            public Player(string path, Effect parent)
             {
+                this.parent = parent;
                 LoadEffects(path);
             }
 
@@ -58,11 +62,49 @@ namespace Effects
                 playerEffects.AddRange(loaded);
             }
 
-            public void SpawnEffect(Vector2 position)
+            public void SpawnDamage(Vector2 hitPoint, GameObject root)
             {
                 if (playerEffects.Count == 0) return;
-                GameObject prefab = playerEffects[Random.Range(0, playerEffects.Count)];
-                Instantiate(prefab, position, Quaternion.identity);
+
+                GameObject prefab = playerEffects.Find(p => p != null && p.name == "damage");
+                if (prefab == null)
+                {
+                    Debug.LogWarning("Effect prefab named 'damage' not found.");
+                    return;
+                }
+
+                // Находим все Collider2D в иерархии
+                Collider2D[] colliders = root.GetComponentsInChildren<Collider2D>();
+
+                if (colliders.Length == 0)
+                {
+                    Debug.LogWarning("No colliders found in root object.");
+                    return;
+                }
+
+                // Ищем ближайший коллайдер к точке попадания
+                Collider2D nearestCollider = colliders
+                    .OrderBy(c => Vector2.Distance(c.bounds.ClosestPoint(hitPoint), hitPoint))
+                    .FirstOrDefault();
+
+                if (nearestCollider == null) return;
+
+                Quaternion rotation = Quaternion.Euler(0, 0, Random.Range(0, 359));
+                Vector2 center = nearestCollider.bounds.center;
+                Vector2 direction = (center - hitPoint).normalized;
+
+                Vector2 testPoint = hitPoint;
+                float offset = 0.2f;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    if (nearestCollider.OverlapPoint(testPoint))
+                        break;
+
+                    testPoint += direction * offset;
+                }
+
+                Instantiate(prefab, testPoint, rotation, nearestCollider.transform);
             }
         }
 
@@ -101,7 +143,7 @@ namespace Effects
 
                 // Смещаем ближе к центру относительно исходной позиции
                 Vector3 directionToCenter = (centerPosition - (Vector3)position).normalized;
-                float offsetDistance = 0.2f; // Насколько ближе к центру (можешь менять число)
+                float offsetDistance = 0.9f; // Насколько ближе к центру (можешь менять число)
 
                 Vector3 adjustedPosition = (Vector3)position + directionToCenter * offsetDistance;
 
@@ -109,11 +151,9 @@ namespace Effects
 
                 parent.Destroy_Effect(spawned, 1f);
             }
-
-
         }
 
-        private void Destroy_Effect(GameObject effect, float timer)
+        public void Destroy_Effect(GameObject effect, float timer)
         {
             StartCoroutine(Destroy(effect, timer));
         }
