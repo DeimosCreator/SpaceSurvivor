@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace Effects
@@ -17,8 +15,8 @@ namespace Effects
         void Awake()
         {
             earth = new Earth("Sprites/Effects/Earth");
-            player = new Player("Sprites/Effects/Player", this);
-            enemy = new Enemy("Sprites/Effects/Enemy", this);
+            player = new Player("Sprites/Effects/Player");
+            enemy = new Enemy("Sprites/Effects/Enemy");
         }
 
         public class Earth
@@ -47,12 +45,10 @@ namespace Effects
 
         public class Player
         {
-            private List<GameObject> playerEffects = new List<GameObject>();
-            private Effect parent;
+            private List<GameObject> playerEffects = new();
 
-            public Player(string path, Effect parent)
+            public Player(string path)
             {
-                this.parent = parent;
                 LoadEffects(path);
             }
 
@@ -110,15 +106,13 @@ namespace Effects
 
         public class Enemy
         {
-            private Dictionary<string, GameObject> enemyEffects = new Dictionary<string, GameObject>();
-            private Effect parent;
+            private Dictionary<string, GameObject> enemyEffects = new();
 
-            public Enemy(string path, Effect parent)
+            public Enemy(string path)
             {
-                this.parent = parent;
                 LoadEffects(path);
             }
-
+            
             void LoadEffects(string path)
             {
                 GameObject[] loaded = Resources.LoadAll<GameObject>(path);
@@ -128,8 +122,8 @@ namespace Effects
                         enemyEffects.Add(obj.name, obj);
                 }
             }
-
-            public void SpawnIskraEffect(GameObject other, Vector2 position, float z)
+            
+            public void SpawnIskraEffect(GameObject other, Vector2 position)
             {
                 if (enemyEffects.Count == 0) return;
 
@@ -138,18 +132,91 @@ namespace Effects
 
                 Quaternion rotation = Quaternion.Euler(0, 0, Random.Range(0, 359));
 
-                // Настоящий центр родителя
                 Vector3 centerPosition = other.transform.position;
 
-                // Смещаем ближе к центру относительно исходной позиции
                 Vector3 directionToCenter = (centerPosition - (Vector3)position).normalized;
-                float offsetDistance = 0.9f; // Насколько ближе к центру (можешь менять число)
+                float offsetDistance = 0.9f;
 
                 Vector3 adjustedPosition = (Vector3)position + directionToCenter * offsetDistance;
 
-                GameObject spawned = Instantiate(prefab, adjustedPosition, rotation, other.transform);
+                Instantiate(prefab, adjustedPosition, rotation, other.transform);
+            }
+            
+            public void SpawnDieEffect(GameObject enemyObj)
+            {
+                Debug.Log("SpawnDieEffect...");
+                SpriteRenderer sr = enemyObj.GetComponent<SpriteRenderer>();
+                if (sr == null || sr.sprite == null)
+                {
+                    Debug.LogWarning("Enemy object has no SpriteRenderer or sprite.");
+                    return;
+                }
 
-                parent.Destroy_Effect(spawned, 1f);
+                Sprite originalSprite = sr.sprite;
+                Texture2D texture = originalSprite.texture;
+
+                if (!texture.isReadable)
+                {
+                    Debug.LogWarning("Texture is not readable. Enable 'Read/Write' in import settings.");
+                    return;
+                }
+
+                Rect spriteRect = originalSprite.rect;
+                int x = Mathf.RoundToInt(spriteRect.x);
+                int y = Mathf.RoundToInt(spriteRect.y);
+                int totalWidth = Mathf.RoundToInt(spriteRect.width);
+                int totalHeight = Mathf.RoundToInt(spriteRect.height);
+
+                int partsCount = Random.Range(4, 7);
+                int basePartWidth = totalWidth / partsCount;
+                int extraPixels = totalWidth % partsCount;
+
+                int accumulatedX = 0;
+
+                for (int i = 0; i < partsCount; i++)
+                {
+                    int partWidth = basePartWidth + (i < extraPixels ? 1 : 0);
+                    int pixelX = x + accumulatedX;
+
+                    if (pixelX + partWidth > texture.width)
+                        partWidth = texture.width - pixelX;
+
+                    Color[] pixels = texture.GetPixels(pixelX, y, partWidth, totalHeight);
+                    Texture2D partTexture = new Texture2D(partWidth, totalHeight, TextureFormat.ARGB32, false);
+                    partTexture.SetPixels(pixels);
+                    partTexture.Apply();
+
+                    Sprite partSprite = Sprite.Create(
+                        partTexture,
+                        new Rect(0, 0, partWidth, totalHeight),
+                        new Vector2(0.5f, 0.5f),
+                        originalSprite.pixelsPerUnit
+                    );
+
+                    GameObject partObj = new GameObject($"EnemyPart_{i}");
+                    partObj.transform.position = enemyObj.transform.position;
+                    partObj.transform.localScale = enemyObj.transform.localScale;
+
+                    SpriteRenderer partSr = partObj.AddComponent<SpriteRenderer>();
+                    partSr.sprite = partSprite;
+                    partSr.sortingLayerID = sr.sortingLayerID;
+                    partSr.sortingOrder = sr.sortingOrder;
+
+                    Rigidbody2D rb = partObj.AddComponent<Rigidbody2D>();
+                    rb.gravityScale = 0.5f;
+                    rb.AddForce(Random.insideUnitCircle.normalized * Random.Range(2f, 4f), ForceMode2D.Impulse);
+                    rb.AddTorque(Random.Range(-100f, 100f));
+
+                    Effect effect = FindObjectOfType<Effect>();
+                    if (effect != null)
+                    {
+                        effect.Destroy_Effect(partObj, 1.5f);
+                    }
+
+                    accumulatedX += partWidth;
+                }
+
+                Destroy(enemyObj);
             }
         }
 
@@ -161,6 +228,7 @@ namespace Effects
         private IEnumerator Destroy(GameObject effect, float timer)
         {
             SpriteRenderer spriteRenderer = effect.GetComponent<SpriteRenderer>();
+            
             if (spriteRenderer == null)
             {
                 yield return new WaitForSeconds(timer);
@@ -173,7 +241,7 @@ namespace Effects
 
             while (elapsed < timer)
             {
-                if (effect != null)
+                if (effect == null)
                 {
                     yield break;
                 }

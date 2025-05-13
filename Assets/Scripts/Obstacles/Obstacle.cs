@@ -7,13 +7,9 @@ namespace Obstacles
     {
         public int hp = 20;
         
-        public void TakeDamage(int amount)
+        public void TakeDamage()
         {
-            hp -= amount;
-            if (hp <= 0)
-            {
-                Die();
-            }
+            Die("Bullet");
         }
 
         void Die(string name = null, int damage = 0)
@@ -29,6 +25,19 @@ namespace Obstacles
                 }
                 Effects.Effect effect = FindObjectOfType<Effects.Effect>();
                 effect.earth.SpawnDamage(gameObject.transform.position);
+                effect.enemy.SpawnDieEffect(gameObject);
+            }
+            
+            if (name == "Player")
+            {
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+                effect.enemy.SpawnDieEffect(gameObject);
+            }
+
+            if (name == "Bullet")
+            {
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+                effect.enemy.SpawnDieEffect(gameObject);
             }
 
             Destroy(gameObject);
@@ -36,18 +45,15 @@ namespace Obstacles
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            Debug.Log($"Столкновение с: {other.gameObject.name}");
-
             if (other.gameObject.CompareTag("Player"))
             {
                 Player.PlayerShooting.health -= hp / 10 * 5;
-                Die();
+                Die("Player");
             }
 
             if (other.gameObject.CompareTag("Planet"))
             {
-                // Когда враг врезается в планету
-                int damageToPlanet = hp / 2; // например половина его жизни как урон планете
+                int damageToPlanet = hp / 2;
                 Die("Planet", damageToPlanet);
             }
         }

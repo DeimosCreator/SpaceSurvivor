@@ -12,11 +12,11 @@ namespace Enemies
             hp -= amount;
             if (hp <= 0)
             {
-                Die();
+                Die("Bullet");
             }
         }
 
-        void Die(string name = null, int damage = 0)
+        void Die(string name, int damage = 0)
         {
             if (name == "Planet")
             {
@@ -29,15 +29,24 @@ namespace Enemies
                 }
                 Effects.Effect effect = FindObjectOfType<Effects.Effect>();
                 effect.earth.SpawnDamage(gameObject.transform.position);
+                effect.enemy.SpawnDieEffect(gameObject);
             }
 
-            Destroy(gameObject);
+            if (name == "Player")
+            {
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+                effect.enemy.SpawnDieEffect(gameObject);
+            }
+
+            if (name == "Bullet")
+            {
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+                effect.enemy.SpawnDieEffect(gameObject);
+            }
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            Debug.Log($"Столкновение с: {other.gameObject.name}");
-
             if (other.gameObject.CompareTag("Player"))
             {
                 Player.PlayerShooting.health -= hp / 10 * 5;
@@ -45,13 +54,13 @@ namespace Enemies
                 Vector2 hitPoint = transform.position;
                 Effects.Effect effect = FindObjectOfType<Effects.Effect>();
                 effect.player.SpawnDamage(hitPoint, other.gameObject);
-                Die();
+                Die("Player");
             }
 
             if (other.gameObject.CompareTag("Planet"))
             {
                 // Когда враг врезается в планету
-                int damageToPlanet = hp / 2; // например половина его жизни как урон планете
+                int damageToPlanet = hp / 2; 
                 Die("Planet", damageToPlanet);
             }
         }

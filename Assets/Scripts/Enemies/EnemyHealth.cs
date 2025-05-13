@@ -10,11 +10,15 @@ namespace Enemies
         private Camera cam;
         private Canvas canvas;
 
+        private CanvasGroup group;
+
         void Start()
         {
             cam = Camera.main;
             rectTransform = GetComponent<RectTransform>();
             canvas = GetComponentInParent<Canvas>();
+            group = gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f; // скрыта в начале
         }
 
         void Update()
@@ -25,18 +29,20 @@ namespace Enemies
                 return;
             }
 
-            Vector3 worldPos = target.position + offset;
-            Vector2 viewportPos = cam.WorldToViewportPoint(worldPos);
-            Vector2 canvasSize = canvas.GetComponent<RectTransform>().sizeDelta;
+            if (group.alpha < 1f && target.position != Vector3.zero)
+                group.alpha = 1f; // показать, когда target уже имеет координаты
 
-            Vector2 uiPos = new Vector2(
-                (viewportPos.x - 0.5f) * canvasSize.x,
-                (viewportPos.y - 0.5f) * canvasSize.y
+            Vector3 worldPos = target.position + offset;
+            Vector2 screenPos = cam.WorldToScreenPoint(worldPos);
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvas.transform as RectTransform,
+                screenPos,
+                cam,
+                out Vector2 localPoint
             );
 
-            rectTransform.anchoredPosition = uiPos;
+            rectTransform.anchoredPosition = localPoint;
         }
-
-
     }
 }

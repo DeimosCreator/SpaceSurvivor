@@ -21,7 +21,7 @@ namespace Player.Weapons
 
                 if (effect != null)
                 {
-                    effect.enemy.SpawnIskraEffect(other.gameObject, gameObject.transform.position, other.transform.rotation.z);
+                    effect.enemy.SpawnIskraEffect(other.gameObject, gameObject.transform.position);
                 }
                 enemy.TakeDamage(damage);
                 Destroy(gameObject);
@@ -30,7 +30,7 @@ namespace Player.Weapons
             var obstacle = other.GetComponent<Obstacles.Obstacle>();
             if (obstacle != null)
             {
-                obstacle.TakeDamage(damage);
+                obstacle.TakeDamage();
                 Destroy(gameObject);
             }
         }

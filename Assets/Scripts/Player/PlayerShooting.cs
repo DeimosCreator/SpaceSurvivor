@@ -120,14 +120,17 @@ namespace Player
             health = Mathf.Min(health + amount, maxHealth);
 
             GameObject[] damageEffects = GameObject.FindGameObjectsWithTag("Damage");
-            
-            int index = Random.Range(0, damageEffects.Length);
-            GameObject toRemove = damageEffects[index];
-            
-            Effects.Effect effect = FindObjectOfType<Effects.Effect>();
-            if (effect != null)
+
+            if (damageEffects.Length != 0)
             {
-                effect.Destroy_Effect(toRemove, 1); 
+                int index = Random.Range(0, damageEffects.Length);
+                GameObject toRemove = damageEffects[index];
+            
+                Effects.Effect effect = FindObjectOfType<Effects.Effect>();
+                if (effect != null)
+                {
+                    effect.Destroy_Effect(toRemove, 1); 
+                }
             }
         }
 
