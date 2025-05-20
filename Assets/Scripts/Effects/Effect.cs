@@ -14,7 +14,7 @@ namespace Effects
 
         void Awake()
         {
-            earth = new Earth("Sprites/Effects/Earth");
+            earth = new Earth("Sprites/Effects/Earth", this);
             player = new Player("Sprites/Effects/Player");
             enemy = new Enemy("Sprites/Effects/Enemy");
         }
@@ -22,9 +22,11 @@ namespace Effects
         public class Earth
         {
             private List<GameObject> damageEffects = new List<GameObject>();
-
-            public Earth(string path)
+            private Effect effectMono;
+            
+            public Earth(string path, Effect mono)
             {
+                effectMono = mono;
                 LoadEffects(path);
             }
 
@@ -34,13 +36,39 @@ namespace Effects
                 damageEffects.AddRange(loaded);
             }
 
-            public void SpawnDamage(Vector2 position)
+            public void SpawnDamage(Vector2 position, float amount, float currentHealth)
             {
                 position = new Vector2(position.x, position.y - 0.65f);
                 if (damageEffects.Count == 0) return;
                 GameObject prefab = damageEffects[Random.Range(0, damageEffects.Count)];
                 Instantiate(prefab, position, Quaternion.identity);
+                effectMono.StartCoroutine(SpawnDamageColor(1, amount, currentHealth));
             }
+
+            private IEnumerator SpawnDamageColor(float duration, float amount, float currentHealth)
+            {
+                GameObject planet = GameObject.FindGameObjectWithTag("Planet");
+                SpriteRenderer spriteRenderer = planet.GetComponent<SpriteRenderer>();
+
+                float newHealth = Mathf.Clamp(currentHealth - amount, 0f, 100f);
+                float health01 = newHealth / 100f;
+
+                Color targetColor = new Color(1f, health01, health01);
+
+                Color startColor = spriteRenderer.color;
+
+                float elapsed = 0f;
+                while (elapsed < duration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / duration);
+                    spriteRenderer.color = Color.Lerp(startColor, targetColor, t);
+                    yield return null;
+                }
+
+                spriteRenderer.color = targetColor;
+            }
+
         }
 
         public class Player

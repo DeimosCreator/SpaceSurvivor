@@ -24,7 +24,7 @@ namespace Obstacles
                     statusPlanetBur.SetScale(damage); // Передаём урон
                 }
                 Effects.Effect effect = FindObjectOfType<Effects.Effect>();
-                effect.earth.SpawnDamage(gameObject.transform.position);
+                effect.earth.SpawnDamage(gameObject.transform.position, damage, statusPlanetBur.currentAmount);
                 effect.enemy.SpawnDieEffect(gameObject);
             }
             

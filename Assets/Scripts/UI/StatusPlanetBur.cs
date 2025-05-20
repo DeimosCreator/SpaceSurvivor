@@ -7,12 +7,12 @@ namespace UI
     {
         public Image image;
 
-        private Color targetColor;
-        private Vector3 targetScale;
+        public Color targetColor;
+        public Vector3 targetScale;
 
-        private readonly float lerpSpeed = 5f; // Плавность
+        public readonly float lerpSpeed = 5f; // Плавность
 
-        private float currentAmount = 100f; // Текущее здоровье в процентах (от 0 до 100)
+        public float currentAmount = 100f; // Текущее здоровье в процентах (от 0 до 100)
 
         private void Awake()
         {
@@ -31,10 +31,6 @@ namespace UI
             }
         }
 
-        /// <summary>
-        /// Уменьшает здоровье шкалы на заданное количество процентов.
-        /// Например, amount = 10 уменьшит здоровье на 10%.
-        /// </summary>
         public void SetScale(float amount)
         {
             currentAmount -= amount;

@@ -49,11 +49,20 @@ namespace Spawner
 
         void SpawnEnemy()
         {
-            if (enemyPrefabs.Length == 0) return;
+            GameObject enemy;
 
-            GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
-            Vector2 pos = new Vector2(Random.Range(-8f, 8f), 6f);
-            GameObject enemy = Instantiate(prefab, pos, Quaternion.identity);
+            if (currentLevel <= 10)
+            {
+                if (enemyPrefabs.Length == 0) return;
+
+                GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+                enemy = Instantiate(prefab, new Vector2(Random.Range(-8f, 8f), 6f), Quaternion.identity);
+            }
+            else
+            {
+                // Создание случайного врага с параметрами по уровню
+                enemy = CreateRandomEnemy(currentLevel);
+            }
 
             // Создание UI шкалы здоровья
             GameObject bar = Instantiate(healthBarPrefab, uiCanvas);
@@ -61,6 +70,7 @@ namespace Spawner
 
             activeEnemies.Add(enemy.transform);
         }
+
 
         void SpawnMeteor()
         {
@@ -120,5 +130,30 @@ namespace Spawner
             currentLevel = Mathf.Clamp(lvl, 1, 10);
             LoadEnemies(currentLevel);
         }
+        
+        GameObject CreateRandomEnemy(int level)
+        {
+            GameObject baseEnemy = Resources.Load<GameObject>("Sprites/Enemies/BaseEnemy");
+
+            if (baseEnemy == null)
+            {
+                Debug.LogError("Не найден BaseEnemy в Resources/Sprites/Enemies/");
+                return null;
+            }
+
+            GameObject newEnemy = Instantiate(baseEnemy, new Vector2(Random.Range(-8f, 8f), 6f), Quaternion.identity);
+
+            // Масштабный прирост HP и урона
+            int hp = 100 + (level - 10) * 20;
+
+            var enemyStats = newEnemy.GetComponent<Enemies.Enemy>();
+            if (enemyStats != null)
+            {
+                enemyStats.SetStats(hp);
+            }
+
+            return newEnemy;
+        }
+
     }
 }
