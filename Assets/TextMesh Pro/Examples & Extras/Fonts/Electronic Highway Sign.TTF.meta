@@ -1,18 +1,19 @@
 fileFormatVersion: 2
-guid: 06121d76bdf5b964787006d0dd6acf68
+guid: 8a2b9e2a607dd2143b58c44bc32410b4
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
-  fontSize: 200
+  fontSize: 16
   forceTextureCase: -2
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
+  fontName: Electronic Highway Sign
   fontNames:
-  - Bezier Sans
+  - Electronic Highway Sign
   fallbackFontReferences: []
   customCharacters: 
-  fontRenderingMode: 2
+  fontRenderingMode: 0
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
   shouldRoundAdvanceValue: 1

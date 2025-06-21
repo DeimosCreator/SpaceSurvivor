@@ -31,5 +31,16 @@ namespace UI
         {
             targetScale = originalScale;
         }
+
+        public void FadeOut()
+        {
+            targetScale = originalScale;
+        }
+
+        public void FadeIn()
+        {
+            targetScale = originalScale * scaleFactor;
+            transform.localScale = targetScale;
+        }
     }
 }

@@ -1,16 +1,17 @@
 using System;
 using System.Globalization;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 
 namespace UI
 {
     public class StatusText : MonoBehaviour
     {
-        public Text health;
-        public Text ammo;
-        public Text time;
-        public Text level;
+        public TextMeshProUGUI health;
+        public TextMeshProUGUI ammo;
+        public TextMeshProUGUI time;
+        public TextMeshProUGUI level;
 
         public Player.PlayerShooting playerShooting;
         public Core.LevelManager levelManager;

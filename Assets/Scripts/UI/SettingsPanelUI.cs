@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 
 namespace UI
@@ -8,12 +9,12 @@ namespace UI
         [Header("Audio")]
         public Slider musicSlider;
         public Slider sfxSlider;
-        public Text musicValueText;
-        public Text sfxValueText;
+        public TextMeshProUGUI musicValueText;
+        public TextMeshProUGUI sfxValueText;
 
         [Header("Quality")]
         public Slider qualitySlider;
-        public Text qualityLabel;
+        public TextMeshProUGUI qualityLabel;
 
         private void Start()
         {

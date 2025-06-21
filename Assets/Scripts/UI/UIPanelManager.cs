@@ -8,12 +8,16 @@ namespace UI
         {
             var fadeOut = oldPanel.GetComponent<UIFade>();
             var fadeIn = newPanel.GetComponent<UIFade>();
-            
+            var ob = FindObjectsOfType<ButtonHoverScaler>();
+            foreach (var o in ob)
+            {
+                o.FadeOut();
+            }
             fadeOut.FadeOut(() =>
             {
                 oldPanel.SetActive(false);
                 newPanel.SetActive(true);
-                if (fadeIn) fadeIn.FadeIn();
+                fadeIn.FadeIn();
             });
         }
     }
